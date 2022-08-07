@@ -11,8 +11,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
 
-@ReactModule(name = "RNStartupTime")
-public class RNStartupTimeModule extends ReactContextBaseJavaModule {
+public class RNStartupTimeModuleImpl {
     public static final String NAME = "RNStartupTime";
 
     private final long startMark;
@@ -20,21 +19,14 @@ public class RNStartupTimeModule extends ReactContextBaseJavaModule {
 
     private boolean alreadyInvoked;
 
-    public RNStartupTimeModule(ReactApplicationContext reactContext, long startMark, boolean enforceSingleInvocation) {
-        super(reactContext);
+        public RNStartupTimeModuleImpl(long startMark, boolean enforceSingleInvocation) {
         this.startMark = startMark;
         this.enforceSingleInvocation = enforceSingleInvocation;
 
         alreadyInvoked = false;
     }
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @ReactMethod
-    public void getTimeSinceStartup(Promise promise) {
+    public void getTimeSinceStartup(Promise promise, Activity activity) {
         try {
             if (enforceSingleInvocation && alreadyInvoked) {
                 throw new IllegalStateException("Redundant invocation of `getTimeSinceStartup`. " +
@@ -44,10 +36,11 @@ public class RNStartupTimeModule extends ReactContextBaseJavaModule {
             alreadyInvoked = true;
 
             int ms = (int) (SystemClock.uptimeMillis() - startMark);
-            Activity activity = getCurrentActivity();
+
             if (activity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 activity.reportFullyDrawn();
             }
+            
             promise.resolve(ms);
 
         } catch (Exception e) {

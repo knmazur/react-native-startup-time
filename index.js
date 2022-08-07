@@ -1,7 +1,8 @@
 import React from 'react';
 import { NativeModules, StyleSheet, Text, View } from 'react-native';
 
-const { RNStartupTime } = NativeModules;
+const isTurboModuleEnabled = global.__turboModuleProxy != null;
+const RNStartupTime = isTurboModuleEnabled ? require("./src/NativeRNStartupTime").default : NativeModules.RNStartupTime
 
 const styles = StyleSheet.create({
   container: {
